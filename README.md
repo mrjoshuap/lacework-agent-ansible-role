@@ -25,7 +25,7 @@ Install the Lacework agent on systems using the yum or apt package manager; it w
 * `lacework_autoUpgrade` - bool
 * `lacework_checkfreq` - string
 * `lacework_cmdlinefilter_allow` - comma separated strings (includes wildcards `*` and `?`)
-* `lacework_cmdlinefilter_disallow` - command separated string
+* `lacework_cmdlinefilter_disallow` - comma separated strings (includes wildcards `*` and `?`)
 * `lacework_containerRunTime` - string (docker/containerd)
 * `lacework_containerEngineEndpoint` - string (path to socket or uri)
 * `lacework_cpuLimit` - string
@@ -56,7 +56,7 @@ There are no dependencies for this role.
 
 ## Example Playbook
 
-An example playbook is available in the [playbook-example.yml](playbook-example.yml):
+A full example playbook is available in [playbook-example.yml](playbook-example.yml):
 
     ---
 
@@ -67,47 +67,10 @@ An example playbook is available in the [playbook-example.yml](playbook-example.
       vars:
         lacework_accessToken: "your token"
 
-        # defaults file for lacework-agent-ansible-role
-        # lacework_skip_import_package_keys: yes
-        # lacework_skip_package_install: yes
-        # lacework_skip_package_repo_install: yes
-        # lacework_skip_install_sh_install: no
-        # lacework_skip_service_enable: yes
-        # lacework_agent_config_pretty_print: yes
-
-        # lacework_autoUpgrade: "enable"
-        # lacework_checkfreq: "60m"
-        # lacework_cmdlinefilter_allow: "*"
-        # lacework_cmdlinefilter_disallow: ""
-
-        # Docker
-        # lacework_containerRunTime: "docker"
-        # lacework_containerEngineEndpoint: "unix:///var/run/docker.sock"
-
-        # Containerd
-        # lacework_containerRunTime: "containerd"
-        # lacework_containerEngineEndpoint: "unix:///run/containerd/containerd.sock"
-
-        # lacework_cpuLimit: "500m"
-        # lacework_dbSize: "2G"
-        # lacework_fim_filepath:
-        #   - "/home/user/.ssh"
-        #   - "/opt/bin"
-        # lacework_fim_fileignore:
-        #   - "/etc/fstab"
-        # lacework_fim_runAt: "23:50"
-        # lacework_fim_mode: "enable"
-        # lacework_fim_noatime: "true"
-        # lacework_interfaceConnectionSize: "512B"
-        # lacework_memLimit: "750M"
-        # lacework_perfMode: "lite"
-        # lacework_proxyUrl: "http://Your_Proxy_Server:Your_Port"
-        # lacework_serverurl: "Your_API_Endpoint"
-
-        # lacework_tags:
-        #   foo: "bar"
-        #   test: "var"
-        #   classic: "false"
+        lacework_tags:
+          foo: "bar"
+          test: "var"
+          classic: "false"
 
       roles:
         - mrjoshuap.lacework_agent_ansible_role
