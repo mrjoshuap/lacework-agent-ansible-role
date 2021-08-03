@@ -1,62 +1,47 @@
 ---
 # tasks file for lacework-agent-ansible-role
-- name: add the lacework repo (yum)
-  yum_repository:
-    name: packages-lacework-prod
-    description: packages-lacework-prod
-    baseurl: https://packages.lacework.net/RPMS/x86_64/
-    gpgkey: https://packages.lacework.net/keys/RPM-GPG-KEY-lacework
-    gpgcheck: yes
-    enabled: yes
-  when: ansible_pkg_mgr == 'yum' and ansible_architecture == 'x86_64'
 
-- name: add the lacework key (apt)
-  apt_key:
-    keyserver: hkp://keyserver.ubuntu.com:80
-    id: "18E76630"
-    state: present
-  when: ansible_pkg_mgr == 'apt' and ansible_architecture == 'x86_64'
+- name: Ensure proper configuration
+  assert:
+    that:
+      - lacework_accessToken is defined
+      # - lacework_accessToken | length > 32
+    fail_msg: |
+      'lacework_accessToken' was not configured.
+      Please see https://support.lacework.com/hc/en-us/articles/360011403853-Generate-API-Access-Keys-and-Tokens#:~:text=To%20create%20an%20API%20key,open%20it%20in%20an%20editor.
+    success_msg: "'lacework_accessToken' is properly set."
 
-- name: add the lacework key (apt)
-  apt_key:
-    keyserver: hkp://keyserver.ubuntu.com:80
-    id: "EE0CC692"
-    state: present
-  when: ansible_pkg_mgr == 'apt' and ansible_architecture == 'x86_64'
+- name: Ensure supported architecture
+  assert:
+    that:
+      - ansible_userspace_bits|int in [64]
+    fail_msg: 'Lacework Agent requires a 64-bit system'
 
-- name: add the lacework repo (apt)
-  apt_repository:
-    repo: "deb [arch=amd64] https://packages.lacework.net/DEB/{{ ansible_distribution | lower  }}/{{  ansible_distribution_version }} {{ ansible_distribution_release }} main"
-    filename: lacework
-    state: present
-    update_cache: yes
-  when: ansible_pkg_mgr == 'apt' and ansible_architecture == 'x86_64'
+- name: Install Lacework Agent (package)
+  block:
+    - name: perform agent installation for rpm based systems
+      include_tasks: prep-rpm.yml
+      when:
+        - ansible_pkg_mgr == 'yum' or ansible_pkg_mgr == 'dnf'
 
-- name: install the lacework datacollector (apt/yum)
-  package:
-    name: lacework
-    state: latest
-  when: ansible_architecture == 'x86_64'
+    - name: perform agent installation for deb based systems
+      include_tasks: prep-deb.yml
+      when:
+        - ansible_pkg_mgr == 'apt'
 
-- name: gather the package information
-  package_facts:
-    manager: auto
-  when: ansible_architecture == 'aarch64'
+    - name: install the lacework datacollector (apt/rpm)
+      package:
+        name: "{{ lacework_package_name }}"
+        state: latest
+  when:
+    - not lacework_skip_package_install | bool
 
-- name: download lacework install.sh if 'lacework' not installed
-  get_url:
-    url: https://packages.lacework.net/install.sh
-    dest: /tmp/lacework_install.sh
-    mode: '0500'
-  when: ansible_architecture == 'aarch64' and 'lacework' not in ansible_facts.packages
-
-- name: install lacework datacollector (install.sh)
-  command: sh /tmp/lacework_install.sh {{ lacework_accessToken }}
-  when: ansible_architecture == 'aarch64' and 'lacework' not in ansible_facts.packages
-
-- name: wait until /var/lib/lacework/config/ is created
-  wait_for:
-    path: /var/lib/lacework/config/
+- name: Install Lacework Agent (install.sh)
+  block:
+    - name: perform agent install with install.sh
+      include_tasks: prep-install-sh.yml
+  when:
+    - "not lacework_skip_install_sh_install | bool"
 
 - name: generate config.json
   template:
@@ -65,3 +50,10 @@
     owner: root
     group: root
     mode: "0644"
+  notify: restart Lacework Agent (datacollector) service
+
+- name: enable Lacework Agent (datacollector) service
+  service:
+    name: datacollector
+    enabled: yes
+  when: not lacework_skip_service_enable | bool

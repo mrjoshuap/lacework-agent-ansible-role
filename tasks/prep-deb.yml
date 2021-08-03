@@ -1,0 +1,14 @@
+- name: add the lacework key (apt)
+  apt_key:
+    keyserver: "{{ lacework_apt_keyserver }}"
+    id: "{{ lacework_apt_id }}"
+    state: present
+  when: not lacework_skip_import_package_keys | bool
+
+- name: add the lacework repo (apt)
+  apt_repository:
+    repo: "{{ lacework_apt_repo }}"
+    filename: "{{ lacework_apt_repo_filename }}"
+    state: present
+    update_cache: "{{ lacework_apt_repo_update_cache | bool }}"
+  when: not lacework_skip_package_repo_install | bool

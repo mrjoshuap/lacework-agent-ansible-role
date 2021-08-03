@@ -1,0 +1,15 @@
+- name: add the lacework key (rpm)
+  ansible.builtin.rpm_key:
+    state: present
+    key: '{{ lacework_yum_repository_gpgkey }}'
+  when: not lacework_skip_import_package_keys | bool
+
+- name: add the lacework repo (rpm)
+  yum_repository:
+    name: '{{ lacework_yum_repository_name }}'
+    description: '{{ lacework_yum_repository_description }}'
+    baseurl: '{{ lacework_yum_repository_baseurl }}'
+    gpgkey: '{{ lacework_yum_repository_gpgkey }}'
+    gpgcheck: '{{ lacework_yum_repository_gpgcheck | bool }}'
+    enabled: '{{ lacework_yum_repository_enabled | bool}}'
+  when: not lacework_skip_package_repo_install | bool

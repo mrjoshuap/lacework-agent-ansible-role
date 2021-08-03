@@ -1,2 +1,39 @@
 ---
 # defaults file for lacework-agent-ansible-role
+lacework_skip_import_package_keys: yes
+lacework_skip_package_install: yes
+lacework_skip_package_repo_install: yes
+lacework_skip_install_sh_install: yes
+lacework_skip_service_enable: yes
+lacework_agent_config_pretty_print: yes
+
+lacework_agent:
+  tokens:
+    AccessToken: "{{ lacework_accessToken | mandatory }}"
+  autoUpgrade: "{{ lacework_autoUpgrade | default(None) }}"
+  checkfreq: "{{ lacework_checkfreq | default(None) }}"
+  cmdlinefilter:
+    allow: "{{ lacework_cmdlinefilter_allow | default(None) }}"
+    disallow: "{{ lacework_cmdlinefilter_disallow | default(None) }}"
+
+  # Docker
+  ContainerRunTime: "{{ lacework_containerRunTime | default(None) }}"
+  ContainerEngineEndpoint: "{{ lacework_containerEngineEndpoint | default(None) }}"
+
+  cpuLimit: "{{ lacework_cpuLimit | default(None) }}"
+  dbSize: "{{ lacework_dbSize | default(None) }}"
+
+  fim:
+    filepath: "{{ lacework_fim_filepath | default(None) }}"
+    fileignore: "{{ lacework_fim_fileignore | default(None) }}"
+    runAt: "{{ lacework_fim_runAt | default(None) }}"
+    mode: "{{ lacework_fim_mode | default(None) }}"
+    noatime: "{{ lacework_fim_noatime | default(None) }}"
+
+  interfaceConnectionSize: "{{ lacework_interfaceConnectionSize | default(None) }}"
+  memLimit: "{{ lacework_memLimit | default(None) }}"
+  perfMode: "{{ lacework_perfMode | default(None) }}"
+  proxyUrl: "{{ lacework_proxyUrl | default(None) }}"
+  serverurl: "{{ lacework_serverurl | default(None) }}"
+
+  tags: "{{ lacework_tags | default({}) }}"

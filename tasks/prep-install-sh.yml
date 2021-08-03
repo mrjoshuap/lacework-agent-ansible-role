@@ -1,0 +1,34 @@
+- name: gather package information
+  package_facts:
+    manager: auto
+
+- name: download lacework install.sh if 'lacework' package not installed
+  get_url:
+    url: '{{ lacework_install_sh_url }}'
+    dest: '{{ lacework_install_sh_dest }}'
+    mode: '0500'
+  when:
+    - "'lacework' not in ansible_facts.packages"
+  register: lacework_install_sh_get_uri
+
+- debug:
+    var: lacework_install_sh_get_uri
+
+- name: install lacework datacollector (install.sh)
+  shell: |
+    /tmp/lacework_install.sh \
+    {% if lacework_install_sh_disable_fim is defined and lacework_install_sh_disable_fim | bool %}-F{% endif %} \
+    {% if lacework_install_sh_enable_strict_mode is defined and lacework_install_sh_enable_strict_mode | bool %}-S{% endif %} \
+    {% if lacework_install_sh_filter_auditd is defined and lacework_install_sh_filter_auditd | bool %}-O{% endif %} \
+    {% if lacework_serverurl is defined and lacework_serverurl | length > 1 %}-U {{ lacework_serverurl }}{% endif %} \
+    {{ lacework_accessToken }}
+  args:
+    creates: /var/lib/lacework/datacollector
+  register: install_sh_result
+
+- debug:
+    var: install_sh_result
+
+- name: wait until /var/lib/lacework/config/ is created
+  wait_for:
+    path: /var/lib/lacework/config/

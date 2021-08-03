@@ -1,2 +1,24 @@
 ---
 # vars file for lacework-agent-ansible-role
+
+lacework_package_name: lacework
+
+lacework_yum_repository_name: packages-lacework-prod
+lacework_yum_repository_description: Lacework Agent Packages
+lacework_yum_repository_baseurl: https://packages.lacework.net/RPMS/$basearch/
+lacework_yum_repository_gpgkey: https://packages.lacework.net/keys/RPM-GPG-KEY-lacework
+lacework_yum_repository_gpgcheck: yes
+lacework_yum_repository_enabled: yes
+
+lacework_apt_keyserver: hkp://keyserver.ubuntu.com:80
+lacework_apt_id: F07B22BC80AFD0B6
+lacework_apt_repo: "deb [arch=amd64] https://packages.lacework.net/DEB/{{ ansible_distribution | lower  }}/{{  ansible_distribution_version }} {{ ansible_distribution_release }} main"
+lacework_apt_repo_filename: lacework
+lacework_apt_repo_update_cache: yes
+
+lacework_install_sh_url: https://packages.lacework.net/install.sh
+lacework_install_sh_dest: /tmp/lacework_install.sh
+lacework_install_sh_disable_fim: no
+lacework_install_sh_enable_strict_mode: no
+lacework_install_sh_filter_auditd: no
+# lacework_install_sh_server_url: "Your_API_Endpoint"

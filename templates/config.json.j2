@@ -1,50 +1,36 @@
-
-{
-  "tokens": {
-    "AccessToken" : "{{ lacework_accessToken }}"
-  }
-  {%- if lacework_cmdAllow is defined or lacework_cmdDisallow is defined %},
-  "cmdlinefilter" : {
-    "allow" : "{{ lacework_cmdAllow | default("*") }}",
-    "disallow" : "{{ lacework_cmdDisallow | default("") }}"
-  }
+{%- set emptyKeys = [] %}
+{%- for k,v in lacework_agent.items() %}
+  {%- if v is not defined or v == "" %}
+    {%- set _dummy=emptyKeys.append(k) %}
   {%- endif %}
-  {%- if lacework_fimFilePath is defined or lacework_fimFileIgnore is defined %},
-  "fim" : {
-    {%- if lacework_fimFilePath is defined %}
-    "filepath" : {{ lacework_fimFilePath | tojson }}
+  {%- if v is mapping %}
+    {%- set vEmptyKeys = [] %}
+    {%- for k1,v1 in v.items() %}
+      {%- if v1 is not defined or v1 == "" %}
+        {%- if k != "cmdlinefilter" or not (k1 == "disallow" and v.allow is defined and v.allow != "") %}
+          {%- set _dummy=vEmptyKeys.append(k1) %}
+        {%- endif %}
+      {%- endif %}
+    {%- endfor %}
+    {%- for x in vEmptyKeys %}
+      {%- set _dummy=v.pop(x) %}
+    {%- endfor %}
+    {%- if v.items() | length == 0 %}
+      {%- set _dummy=emptyKeys.append(k) %}
     {%- endif %}
-    {%- if lacework_fimFilePath is defined and lacework_fimFileIgnore is defined %},{%- endif %}
-    {%- if lacework_fimFileIgnore is defined %}
-    "fileignore" : {{ lacework_fimFileIgnore | tojson }}
-    {%- endif %}
-  }
   {%- endif %}
-  {%- if lacework_autoUpgrade is defined %},
-  "AutoUpgrade" : "{{ lacework_autoUpgrade }}"
-  {%- endif %}
-  {%- if lacework_checkfreq is defined %},
-  "checkfreq" : "{{ lacework_checkfreq }}"
-  {%- endif %}
-  {%- if lacework_cpuLimit is defined %},
-  "cpulimit" : "{{ lacework_cpuLimit }}"
-  {%- endif %}
-  {%- if lacework_dbSize is defined %},
-  "DbSize" : "{{ lacework_dbSize }}"
-  {%- endif %}
-  {%- if lacework_interfaceConnectionSize is defined %},
-  "InterfaceConnectionSize" : "{{ lacework_interfaceConnectionSize }}"
-  {%- endif %}
-  {%- if lacework_memLimit is defined %},
-  "memlimit" : "{{ lacework_memLimit }}"
-  {%- endif %}
-  {%- if lacework_perfMode is defined %},
-  "perfmode" : "{{ lacework_perfMode }}"
-  {%- endif %}
-  {%- if lacework_proxyUrl is defined %},
-  "ProxyUrl" : "{{ lacework_proxyUrl }}"
-  {%- endif %}
-  {%- if lacework_tags is defined %},
-  "Tags": {{ lacework_tags |tojson }}
-  {%- endif %}
-}
+{%- endfor %}
+{%- for x in emptyKeys %}
+  {%- set _dummy=lacework_agent.pop(x) %}
+{%- endfor %}
+{%- if lacework_agent.fim is defined and lacework_agent.fim.items() | length == 0 %}
+  {%- set _dummy=lacework_agent.pop('fim') %}
+{%- endif %}
+{%- if lacework_agent.cmdlinefilter is defined and lacework_agent.cmdlinefilter.items() | length == 0 %}
+  {%- set _dummy=lacework_agent.pop('cmdlinefilter') %}
+{%- endif %}
+{%- if lacework_agent_config_pretty_print | bool %}
+{{ lacework_agent | to_nice_json(indent=2) }}
+{%- else %}
+{{ lacework_agent | tojson }}
+{%- endif %}
