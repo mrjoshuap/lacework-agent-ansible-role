@@ -1,7 +1,7 @@
 ---
 
 - name: "Install Lacework Agent"
-  hosts: jumphost.local
+  hosts: all
   become: yes
 
   vars:

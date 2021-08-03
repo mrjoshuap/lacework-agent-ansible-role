@@ -61,7 +61,7 @@ A full example playbook is available in [playbook-example.yml](playbook-example.
     ---
 
     - name: "Install Lacework Agent"
-      hosts: jumphost.local
+      hosts: all
       become: yes
 
       vars:
